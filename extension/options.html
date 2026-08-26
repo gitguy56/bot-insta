@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Easy Signup Assistant — Your Info</title>
+<link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to form</a>
+
+  <header>
+    <h1>Easy Signup Assistant</h1>
+    <button id="contrastToggle" type="button" aria-pressed="false">High contrast: Off</button>
+  </header>
+
+  <main id="main">
+    <p id="progress" aria-live="polite">Step 1 of 7</p>
+    <div id="liveRegion" class="visually-hidden" aria-live="polite"></div>
+
+    <form id="wizardForm" novalidate>
+
+      <!-- Step 0: Welcome -->
+      <fieldset data-step="0">
+        <legend>Welcome</legend>
+        <p>This form asks for your name, a password, and a few details. We save it only on this
+           device (not sent anywhere) and use it to help fill in Google and Instagram's real
+           sign-up pages for you.</p>
+        <p><strong>Important:</strong> this tool does not create the account by itself. You (or
+           someone helping you) will still press the final Submit/Sign up button, and complete
+           any step where the site asks you to prove you're a real person, such as typing a code
+           texted to a phone or solving a "click all the traffic lights" puzzle. That step has to
+           be done by a real person, so we can't do it for you.</p>
+        <button type="button" class="readAloud" data-target="0">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <!-- Step 1: Name -->
+      <fieldset data-step="1">
+        <legend>Your name</legend>
+        <label for="firstName">First name</label>
+        <input id="firstName" name="firstName" type="text" autocomplete="given-name" required />
+
+        <label for="lastName">Last name</label>
+        <input id="lastName" name="lastName" type="text" autocomplete="family-name" required />
+        <button type="button" class="readAloud" data-target="1">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <!-- Step 2: Username -->
+      <fieldset data-step="2">
+        <legend>Username</legend>
+        <p class="hint">This is the name people will see. It will also be part of your Gmail
+           address — for example, if you choose "janedoe", your email would be
+           janedoe@gmail.com. Letters and numbers only, no spaces.</p>
+        <label for="usernameBase">Username</label>
+        <input id="usernameBase" name="usernameBase" type="text" autocomplete="username" required
+               pattern="[A-Za-z0-9_.]+" />
+        <button type="button" class="readAloud" data-target="2">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <!-- Step 3: Password -->
+      <fieldset data-step="3">
+        <legend>Password</legend>
+        <p class="hint">Use at least 8 characters. Mix in a number if you can.</p>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required minlength="8" />
+
+        <label for="confirmPassword">Type it again</label>
+        <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" />
+
+        <label class="checkbox">
+          <input type="checkbox" id="showPassword" /> Show my password while typing
+        </label>
+        <p id="passwordMismatch" class="error" role="alert" hidden>Those two passwords don't match yet.</p>
+        <button type="button" class="readAloud" data-target="3">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <!-- Step 4: Birthday -->
+      <fieldset data-step="4">
+        <legend>Your birthday</legend>
+        <p class="hint">Google and Instagram both ask for this to confirm your age.</p>
+        <label for="birthMonth">Month</label>
+        <select id="birthMonth" name="birthMonth" required>
+          <option value="">Choose…</option>
+          <option value="1">January</option><option value="2">February</option>
+          <option value="3">March</option><option value="4">April</option>
+          <option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option>
+          <option value="9">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select>
+
+        <label for="birthDay">Day</label>
+        <input id="birthDay" name="birthDay" type="number" min="1" max="31" required />
+
+        <label for="birthYear">Year</label>
+        <input id="birthYear" name="birthYear" type="number" min="1900" max="2026" required />
+        <button type="button" class="readAloud" data-target="4">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <!-- Step 5: Photo -->
+      <fieldset data-step="5">
+        <legend>Profile picture (optional)</legend>
+        <p class="hint">Choose a real photo of yourself if you'd like one. You can skip this and add it later.</p>
+        <label for="photo">Choose a picture</label>
+        <input id="photo" name="photo" type="file" accept="image/*" />
+        <img id="photoPreview" alt="Preview of chosen profile picture" hidden />
+        <button type="button" id="removePhoto" hidden>Remove picture</button>
+        <button type="button" class="readAloud" data-target="5">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <!-- Step 6: Review -->
+      <fieldset data-step="6">
+        <legend>Review &amp; save</legend>
+        <div id="reviewSummary"></div>
+        <button type="button" class="readAloud" data-target="6">🔊 Read this step aloud</button>
+      </fieldset>
+
+      <nav class="wizard-nav">
+        <button type="button" id="backBtn">Back</button>
+        <button type="button" id="nextBtn">Next</button>
+        <button type="submit" id="saveBtn" hidden>Save my info</button>
+      </nav>
+    </form>
+
+    <p id="savedMessage" role="status" hidden>
+      ✅ Saved on this device. Now go to Google's or Instagram's sign-up page — we'll offer to help fill it in.
+    </p>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>

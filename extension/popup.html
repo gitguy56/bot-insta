@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Easy Signup Assistant</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    width: 280px;
+    padding: 16px;
+    font-size: 16px;
+    color: #1a1a1a;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  p { line-height: 1.4; }
+  button {
+    display: block;
+    width: 100%;
+    font-size: 16px;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 2px solid #1a4fd6;
+    background: #1a4fd6;
+    color: #fff;
+    cursor: pointer;
+  }
+  button.secondary {
+    background: #fff;
+    color: #1a4fd6;
+  }
+  #status {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    background: #f0f0f0;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+  <h1>Easy Signup Assistant</h1>
+  <p>Fill out your info once. We'll help fill in the real Google &amp; Instagram sign-up pages for you.</p>
+  <div id="status">Checking your saved info…</div>
+  <button id="openForm">Fill in / edit my info</button>
+  <button id="clearData" class="secondary">Clear my saved info</button>
+  <script src="popup.js"></script>
+</body>
+</html>
