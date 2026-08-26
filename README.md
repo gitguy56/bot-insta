@@ -1,47 +1,51 @@
-# Easy Signup Assistant (prototype)
+# Easy Signup Helper
 
-An accessibility prototype to help elderly and disabled users sign up for
-their own Google and Instagram accounts, using their **own real name and
-photo**. It does not create accounts automatically and does not solve
-CAPTCHAs or phone verification — a real person still completes those steps.
+An accessibility prototype site to help elderly and disabled users prepare
+everything they need to sign up for their own Google and Instagram
+accounts, using their **own real name and photo**. It does not create
+accounts automatically and does not solve CAPTCHAs or phone verification —
+a real person still does that, on the real sign-up page.
 
 ## What it does
 
-1. **`extension/options.html`** — a step-by-step, screen-reader-friendly
-   form (one question per screen, large text, high-contrast mode, read-aloud
-   buttons) that collects a name, desired username, password, birthday, and
-   an optional profile photo. Saved only to the browser's local extension
-   storage on that device — nothing is sent to a server.
-2. On `accounts.google.com` and `www.instagram.com` sign-up pages, a content
-   script offers a small on-page panel that can:
-   - try to auto-fill the matching fields on the real sign-up form, or
-   - show the saved info in large text with "Copy" buttons, so it can be
-     typed in by hand if a site's page layout has changed and auto-detection
-     doesn't find the fields.
+A single-page site (`site/index.html`) with a step-by-step,
+screen-reader-friendly form — one question per screen, large text,
+high-contrast mode, and a "read this step aloud" button on every step. It
+asks for a name, desired username, password, birthday, and an optional
+profile photo.
 
-The person (or someone assisting them) still reviews every field, clicks the
-site's own Submit/Sign up button, and completes any phone-verification code
-or "prove you're human" step themselves — that part must be done by a real
-human and is intentionally not automated here.
+Everything is saved only in the browser's local storage on that device —
+nothing is sent to a server, there is no backend.
 
-## Loading the prototype
+After saving, the page shows every answer in large text with a **Copy**
+button next to each one, plus direct links to open Google's and
+Instagram's real sign-up pages in a new tab. The person (or someone
+helping them) copies each answer over, reviews it, and clicks the site's
+own Submit/Sign up button themselves — including any phone-verification
+code or "prove you're human" step, which must be done by a real human and
+is intentionally not automated here.
 
-1. Open `chrome://extensions`.
-2. Enable "Developer mode" (top right).
-3. Click "Load unpacked" and select the `extension/` folder.
-4. Click the extension icon → "Fill in / edit my info" to open the form.
-5. Visit `https://accounts.google.com/signup` or
-   `https://www.instagram.com/accounts/emailsignup/` to see the assistant
-   panel.
+## Running it
+
+No build step or server needed — it's plain HTML/CSS/JS.
+
+- **Quickest:** open `site/index.html` directly in a browser (double-click it,
+  or drag it into a browser window).
+- **Or serve it locally**, if you'd rather test it over `http://`:
+  ```
+  cd site
+  python3 -m http.server 8000
+  ```
+  then visit `http://localhost:8000`.
 
 ## Known limitations
 
-- The CSS selectors used to find Google/Instagram's form fields are
-  best-effort guesses at their current page structure. Both sites change
-  their sign-up flow fairly often, so auto-fill may stop finding fields —
-  the "show my info to copy" fallback is there for exactly that case.
-- Data is stored unencrypted in the browser's local extension storage. This
-  is fine for a local prototype but should not be considered secure storage
-  for real passwords long-term.
-- This is a prototype, not a production accessibility tool — it hasn't been
-  tested with real assistive technology users yet.
+- This is a prototype, not a production accessibility tool — it hasn't
+  been tested with real assistive technology users yet.
+- Data (including the password) is stored unencrypted in the browser's
+  local storage on that device. Fine for a local prototype; not meant as
+  secure long-term password storage.
+- There's no way for a website to reach into a different site's page (like
+  Google's or Instagram's sign-up form) and fill it in automatically —
+  browsers block that across sites for security. That's why this prototype
+  shows a copy-and-paste panel instead of auto-filling those pages.

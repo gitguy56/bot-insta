@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Easy Signup Assistant — Your Info</title>
-<link rel="stylesheet" href="options.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Easy Signup Helper</title>
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to form</a>
 
   <header>
-    <h1>Easy Signup Assistant</h1>
+    <h1>Easy Signup Helper</h1>
     <button id="contrastToggle" type="button" aria-pressed="false">High contrast: Off</button>
   </header>
 
@@ -22,14 +23,14 @@
       <!-- Step 0: Welcome -->
       <fieldset data-step="0">
         <legend>Welcome</legend>
-        <p>This form asks for your name, a password, and a few details. We save it only on this
-           device (not sent anywhere) and use it to help fill in Google and Instagram's real
-           sign-up pages for you.</p>
-        <p><strong>Important:</strong> this tool does not create the account by itself. You (or
-           someone helping you) will still press the final Submit/Sign up button, and complete
-           any step where the site asks you to prove you're a real person, such as typing a code
-           texted to a phone or solving a "click all the traffic lights" puzzle. That step has to
-           be done by a real person, so we can't do it for you.</p>
+        <p>This form asks for your name, a password, and a few details, to make signing up for
+           Google and Instagram easier. Everything you type stays in this browser on this
+           device — it is never sent anywhere.</p>
+        <p>At the end, we'll show you everything in big text with "Copy" buttons, so you (or
+           someone helping you) can paste each answer straight into Google's or Instagram's real
+           sign-up page. You'll still press their Submit button yourself, and complete any step
+           where they ask you to prove you're a real person — like a code texted to a phone, or a
+           puzzle. That part has to be done by a real person.</p>
         <button type="button" class="readAloud" data-target="0">🔊 Read this step aloud</button>
       </fieldset>
 
@@ -48,8 +49,8 @@
       <fieldset data-step="2">
         <legend>Username</legend>
         <p class="hint">This is the name people will see. It will also be part of your Gmail
-           address — for example, if you choose "janedoe", your email would be
-           janedoe@gmail.com. Letters and numbers only, no spaces.</p>
+           address — for example, "janedoe" would make your email janedoe@gmail.com. Letters and
+           numbers only, no spaces.</p>
         <label for="usernameBase">Username</label>
         <input id="usernameBase" name="usernameBase" type="text" autocomplete="username" required
                pattern="[A-Za-z0-9_.]+" />
@@ -121,11 +122,20 @@
       </nav>
     </form>
 
-    <p id="savedMessage" role="status" hidden>
-      ✅ Saved on this device. Now go to Google's or Instagram's sign-up page — we'll offer to help fill it in.
-    </p>
+    <section id="copyPanel" hidden aria-labelledby="copyPanelHeading">
+      <h2 id="copyPanelHeading">✅ Saved — here's your info to copy</h2>
+      <p>Open Google's or Instagram's sign-up page in another tab, then come back here and press
+         "Copy" next to each answer to paste it in.</p>
+      <p>
+        <a href="https://accounts.google.com/signup" target="_blank" rel="noopener">Open Google sign-up</a>
+        &nbsp;·&nbsp;
+        <a href="https://www.instagram.com/accounts/emailsignup/" target="_blank" rel="noopener">Open Instagram sign-up</a>
+      </p>
+      <table class="copy-table" id="copyTable"></table>
+      <button type="button" id="editAgain">Edit my info</button>
+    </section>
   </main>
 
-  <script src="options.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

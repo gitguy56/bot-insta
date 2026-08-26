@@ -8,9 +8,11 @@ const backBtn = document.getElementById('backBtn');
 const nextBtn = document.getElementById('nextBtn');
 const saveBtn = document.getElementById('saveBtn');
 const form = document.getElementById('wizardForm');
+const copyPanel = document.getElementById('copyPanel');
+const STORAGE_KEY = 'easySignupProfile';
 
 const stepText = {
-  0: 'Welcome. This form asks for your name, a password, and a few details. We save it only on this device, and use it to help fill in Google and Instagram sign up pages for you. You still press submit yourself and complete any human verification step.',
+  0: 'Welcome. This form asks for your name, a password, and a few details. Everything stays in this browser on this device. At the end we show you your answers in big text with copy buttons, to paste into the real Google or Instagram sign up page. You still press submit yourself and complete any human verification step.',
   1: 'Your name. Enter your first name and last name.',
   2: 'Username. Enter the username you want. Letters and numbers only, no spaces. This will also be part of your Gmail address.',
   3: 'Password. Enter a password with at least 8 characters, then type it again to confirm.',
@@ -76,8 +78,7 @@ document.querySelectorAll('.readAloud').forEach((btn) => {
 function speak(text) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  window.speechSynthesis.speak(utter);
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 }
 
 document.getElementById('showPassword').addEventListener('change', (e) => {
@@ -90,13 +91,13 @@ document.getElementById('contrastToggle').addEventListener('click', (e) => {
   const on = document.body.classList.toggle('high-contrast');
   e.target.setAttribute('aria-pressed', String(on));
   e.target.textContent = `High contrast: ${on ? 'On' : 'Off'}`;
-  chrome.storage.local.set({ highContrast: on });
+  localStorage.setItem('easySignupHighContrast', on ? '1' : '0');
 });
 
 document.getElementById('photo').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  resizeImageToDataUrl(file, 512).then((dataUrl) => {
+  resizeImageToDataUrl(file, 320).then((dataUrl) => {
     photoDataUrl = dataUrl;
     const preview = document.getElementById('photoPreview');
     preview.src = dataUrl;
@@ -141,6 +142,7 @@ function renderReview() {
     <dl>
       <dt>Name</dt><dd>${escapeHtml(data.firstName)} ${escapeHtml(data.lastName)}</dd>
       <dt>Username</dt><dd>${escapeHtml(data.usernameBase)}</dd>
+      <dt>Gmail address</dt><dd>${escapeHtml(data.usernameBase)}@gmail.com</dd>
       <dt>Password</dt><dd>${'•'.repeat(Math.min(data.password.length, 12)) || '(not set)'}</dd>
       <dt>Birthday</dt><dd>${escapeHtml(data.birthMonth)}/${escapeHtml(data.birthDay)}/${escapeHtml(data.birthYear)}</dd>
       <dt>Picture</dt><dd>${photoDataUrl ? 'Added' : 'None chosen'}</dd>
@@ -152,6 +154,12 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (c) => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
+}
+
+function monthName(num) {
+  const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+    'August', 'September', 'October', 'November', 'December'];
+  return names[Number(num) - 1] || num;
 }
 
 function collectData() {
@@ -166,39 +174,101 @@ function collectData() {
   };
 }
 
+function renderCopyPanel(profile) {
+  const rows = [
+    ['First name', profile.firstName],
+    ['Last name', profile.lastName],
+    ['Full name', `${profile.firstName} ${profile.lastName}`.trim()],
+    ['Username', profile.usernameBase],
+    ['Gmail address', `${profile.usernameBase}@gmail.com`],
+    ['Password', profile.password],
+    ['Birth month', monthName(profile.birthMonth)],
+    ['Birth day', profile.birthDay],
+    ['Birth year', profile.birthYear],
+  ];
+  const table = document.getElementById('copyTable');
+  table.innerHTML = rows.map(([label, value]) => `
+    <tr>
+      <th scope="row">${escapeHtml(label)}</th>
+      <td>${label === 'Password' ? '•'.repeat(Math.min(value.length, 12)) : escapeHtml(value)}</td>
+      <td><button type="button" class="copyBtn" data-value="${escapeHtml(value)}" data-label="${escapeHtml(label)}">Copy</button></td>
+    </tr>
+  `).join('');
+
+  table.querySelectorAll('.copyBtn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.value).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        liveRegion.textContent = `${btn.dataset.label} copied.`;
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      });
+    });
+  });
+
+  if (profile.photoDataUrl) {
+    const img = document.createElement('img');
+    img.src = profile.photoDataUrl;
+    img.alt = 'Your saved profile picture — right-click to save it, then upload it on the sign-up page.';
+    img.style.maxWidth = '160px';
+    img.style.display = 'block';
+    img.style.marginTop = '12px';
+    img.style.borderRadius = '8px';
+    copyPanel.insertBefore(img, table.nextSibling);
+  }
+}
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (!validateStep(current)) return;
   const profile = { ...collectData(), photoDataUrl, updatedAt: Date.now() };
-  chrome.storage.local.set({ profile }, () => {
-    document.getElementById('savedMessage').hidden = false;
-    liveRegion.textContent = 'Saved.';
-  });
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+  } catch (err) {
+    // Storage full (e.g. large photo) — still show the copy panel from memory.
+  }
+  form.hidden = true;
+  copyPanel.hidden = false;
+  renderCopyPanel(profile);
+  liveRegion.textContent = 'Saved. Your info is ready to copy below.';
+  copyPanel.querySelector('h2').focus?.();
+  copyPanel.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('editAgain').addEventListener('click', () => {
+  copyPanel.hidden = true;
+  form.hidden = false;
+  current = 0;
+  showStep(0);
 });
 
 // Restore existing profile + preferences, if any.
-chrome.storage.local.get(['profile', 'highContrast'], ({ profile, highContrast }) => {
-  if (highContrast) {
+(function restore() {
+  if (localStorage.getItem('easySignupHighContrast') === '1') {
     document.body.classList.add('high-contrast');
     document.getElementById('contrastToggle').setAttribute('aria-pressed', 'true');
     document.getElementById('contrastToggle').textContent = 'High contrast: On';
   }
-  if (profile) {
-    document.getElementById('firstName').value = profile.firstName || '';
-    document.getElementById('lastName').value = profile.lastName || '';
-    document.getElementById('usernameBase').value = profile.usernameBase || '';
-    document.getElementById('password').value = profile.password || '';
-    document.getElementById('confirmPassword').value = profile.password || '';
-    document.getElementById('birthMonth').value = profile.birthMonth || '';
-    document.getElementById('birthDay').value = profile.birthDay || '';
-    document.getElementById('birthYear').value = profile.birthYear || '';
-    if (profile.photoDataUrl) {
-      photoDataUrl = profile.photoDataUrl;
-      const preview = document.getElementById('photoPreview');
-      preview.src = photoDataUrl;
-      preview.hidden = false;
-      document.getElementById('removePhoto').hidden = false;
-    }
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try {
+      const profile = JSON.parse(raw);
+      document.getElementById('firstName').value = profile.firstName || '';
+      document.getElementById('lastName').value = profile.lastName || '';
+      document.getElementById('usernameBase').value = profile.usernameBase || '';
+      document.getElementById('password').value = profile.password || '';
+      document.getElementById('confirmPassword').value = profile.password || '';
+      document.getElementById('birthMonth').value = profile.birthMonth || '';
+      document.getElementById('birthDay').value = profile.birthDay || '';
+      document.getElementById('birthYear').value = profile.birthYear || '';
+      if (profile.photoDataUrl) {
+        photoDataUrl = profile.photoDataUrl;
+        const preview = document.getElementById('photoPreview');
+        preview.src = photoDataUrl;
+        preview.hidden = false;
+        document.getElementById('removePhoto').hidden = false;
+      }
+    } catch (err) { /* ignore corrupt saved data */ }
   }
   showStep(0);
-});
+})();
